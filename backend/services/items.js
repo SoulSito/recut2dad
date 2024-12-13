@@ -117,10 +117,28 @@ async function getDat2(req, res) {
   }
 }
 
+// Función para obtener los datos de la base de datos
+async function getDat3(req, res) {
+  try {
+    // Realizamos la consulta SELECT para obtener todos los items de la tabla coleccion
+    const rows = await db.query('SELECT * FROM devaluacion');
+
+    // Usamos el helper para garantizar que no haya datos vacíos
+    const deva = helper.emptyOrRows(rows);
+
+    // Retornamos los datos obtenidos
+    return res.json({ deva });
+  } catch (err) {
+    console.error('Error al obtener los datos: ', err.message);
+    return res.status(500).json({ message: 'Error al obtener los datos' });
+  }
+}
+
 module.exports = {
   getData,
   insertData,
   deleteData,
   insertDat2,
   getDat2,
+  getDat3,
 };

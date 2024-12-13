@@ -1,24 +1,15 @@
 import React, { useState } from 'react';
 import { Alert, Box, Button, Card, CardContent, CircularProgress, Container, Paper, Typography } from '@mui/material';
 import Menu from '../components/Menu';
-import InformeColeccion from '../components/InformeColeccion'; // Importar el nuevo componente
-import { authActions } from '../store/authSlice';
-import { useNavigate } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
+import InformeColeccion from '../components/InformeColeccion';
+import InformeDevalua from '../components/InformeDevalua'; // Importar el nuevo componente
 
 const Reports: React.FC = () => {
   
-  const dispatch = useDispatch();
-  const navigate = useNavigate();
-  
-  const handleLogout = () => {
-    dispatch(authActions.logout());
-    navigate('/');
-  };
-
     // Estado para manejar si el informe ha sido generado
     const [isReportGenerated, setIsReportGenerated] = useState(false);
     const [data, setData] = useState<any[]>([]); // Almacenaremos los datos obtenidos de la base de datos
+    const [deva, setDeva] = useState<any[]>([]); // Almacenaremos los datos obtenidos de la base de datos
     const [loading, setLoading] = useState<boolean>(false); // Para controlar el estado de carga
     const [error, setError] = useState<string>(''); // Para almacenar el error en caso de que la API falle
 
@@ -43,6 +34,26 @@ const Reports: React.FC = () => {
     }
   };
 
+  const fetchReportDeva = async () => {
+    setLoading(true); // Activar el estado de carga
+    setError(''); // Limpiar el error previo
+    try {
+      const response = await fetch('http://localhost:3030/getItem3');
+      const deva = await response.json();
+      
+      if (response.ok) {
+        setDeva(deva.deva); // Almacenamos los datos obtenidos
+        setIsReportGenerated(true); // Indicamos que el informe ha sido generado
+      } else {
+        throw new Error('Error al obtener los datos del informe');
+      }
+    } catch (error) {
+      setError('Hubo un problema al cargar los datos. Inténtalo nuevamente.');
+    } finally {
+      setLoading(false); // Desactivar el estado de carga
+    }
+  };
+
   return(
    <Box sx={{ flexGrow: 1 }}>
   <Menu/>  {/* Usamos el Menu como encabezado */}
@@ -52,7 +63,7 @@ const Reports: React.FC = () => {
     <Card sx={{ width: '100%', maxWidth: 1500, borderRadius: 3, boxShadow: 3 }}>
       <CardContent>
         <Typography variant="h4" color="primary" gutterBottom>
-          Página de Reports de Anibal
+          Página de Reports/Informe Coleccion de Anibal
         </Typography>
         <Typography variant="body1" color="#1976d2" gutterBottom>
           Aquí puedes ver los informes y generar nuevos reportes.
@@ -80,7 +91,49 @@ const Reports: React.FC = () => {
             GENERAR INFORME COLECCIÓN
           </Button>
         )}
-
+        {/* Renderizar el informe si la variable de control está en true */}
+        {isReportGenerated && !loading && (
+          <Paper sx={{ mt: 4, padding: 3, boxShadow: 3 }}>
+            {/* Eliminamos el mensaje "Informe Generado" */}
+            <InformeColeccion data={data} />
+          </Paper>
+        )}
+      </CardContent>
+    </Card>
+  </Container>
+  
+  <Container sx={{ display: 'flex', justifyContent: 'center', marginTop: 3 }}>
+    <Card sx={{ width: '100%', maxWidth: 1500, borderRadius: 3, boxShadow: 3 }}>
+      <CardContent>
+        <Typography variant="h4" color="primary" gutterBottom>
+          Página de Reports/Informe Devaluacion de Anibal
+        </Typography>
+        <Typography variant="body1" color="#1976d2" gutterBottom>
+          Aquí puedes ver los informes y generar nuevos reportes.
+        </Typography>
+         
+        {/* Mostrar el botón solo si no hay informe generado aún */}
+          {!isReportGenerated && !loading && (
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={fetchReportDeva}
+            sx={{
+              mt: 3,
+              padding: '12px 24px',
+              borderRadius: '20px',
+              fontSize: '16px',
+              width: '50%',  // Ajustamos el tamaño del botón
+              alignSelf: 'center',
+              boxShadow: 3,
+              '&:hover': {
+                backgroundColor: '#1976d2', // Color cuando el botón está en hover
+              },
+            }}
+          >
+            GENERAR INFORME DEVALUACION
+          </Button>
+        )}
         {/* Mostrar un indicador de carga mientras los datos se obtienen */}
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
@@ -99,7 +152,7 @@ const Reports: React.FC = () => {
         {isReportGenerated && !loading && (
           <Paper sx={{ mt: 4, padding: 3, boxShadow: 3 }}>
             {/* Eliminamos el mensaje "Informe Generado" */}
-            <InformeColeccion data={data} />
+            <InformeDevalua deva={deva} />
           </Paper>
         )}
       </CardContent>

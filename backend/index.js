@@ -94,6 +94,16 @@ app.get('/getItem2', async (req, res) => {
   }
 });
 
+// Endpoint para obtener todos los items de la base de datos
+app.get('/getItem3', async (req, res) => {
+  try {
+    await items.getDat3(req, res); // Llama la función getData del archivo items.js
+  } catch (err) {
+    console.error(`Error while getting items: ${err.message}`);
+    res.status(500).json({ message: 'Error al obtener los items' });
+  }
+});
+
 
 //Iniciamos la API
 app.listen(port)
